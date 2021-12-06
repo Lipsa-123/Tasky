@@ -2,13 +2,13 @@
 const taskContainer=document.querySelector(".task_container");
 console.log(taskContainer);
 
-const globalArray=[];
+let globalArray=[];
 const newCard=({id, imageUrl, taskTitle, taskType, taskDescription}) => `
 <div class="col-md-6 col-lg-4" id=${id}>
 <div class="card">
     <div class="card-header d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-outline-success"><i class="fas fa-pencil-alt"></i></button>
-        <button type="button" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+        <button type="button"  id=${id} class="btn btn-outline-danger" onclick="deleteCard.apply(this, arguments)"><i class="fas fa-trash-alt" id=${id} onclick="deleteCard.apply(this, arguments)"></i></button>
     </div>
     <img src=${imageUrl} class="card-img-top" alt="...">
 
@@ -18,7 +18,7 @@ const newCard=({id, imageUrl, taskTitle, taskType, taskDescription}) => `
       <span class="badge bg-primary">${taskType}</span>
     </div>
     <div class="card-footer text-muted ">
-        <button type="button" class="btn btn-outline-primary float-end">Open task</button>
+        <button type="button" class="btn btn-outline-primary float-end " >Open task</button>
     </div>
   </div>    
 </div>`
@@ -40,6 +40,10 @@ const loadInitialTaskCards =()=>{
        globalArray.push(cardObject);
     });
 };
+
+const updateLocalStorage = () =>{
+    localStorage.setItem("tasky", JSON.stringify({cards: globalArray})); 
+}
 const saveChanges = () =>{
     const taskData={
         id: `${Date.now()}`,//unique number for card id
@@ -55,5 +59,23 @@ taskContainer.insertAdjacentHTML("beforeend", createNewCard);
 globalArray.push(taskData);
 
 //add to localstorage
-localStorage.setItem("tasky", JSON.stringify({cards: globalArray})); 
+  updateLocalStorage();
+};
+
+const deleteCard = (event) =>{
+    //id
+    event=window.event;
+    const targetId=event.target.id;
+    const tagname=event.target.tagName;// it will return BUTTON
+    
+    //serch thw globalstore, remove the object which matches the id
+    globalArray=globalArray.filter((cardObject) => cardObject.id!== targetId);
+    //loop over the new globalstore, and inject updated to DOM
+    updateLocalStorage();
+
+    if(tagname=== "BUTTON"){
+        //task container
+        return event.target.parentNode.parentNode.parentNode.parentNode.removeChild(event.target.parentNode.parentNode.parentNode);
+    }
+    return event.target.parentNode.parentNode.parentNode.parentNode.parentNode.removeChild(event.target.parentNode.parentNode.parentNode.parentNode);
 };
